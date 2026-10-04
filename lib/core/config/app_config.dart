@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Runtime configuration for the Parfum IM mobile app.
@@ -7,8 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The base URL differs per platform because Android devices cannot reach the
 /// host machine through `localhost`:
 ///
-/// * Android device / emulator on the current Wi-Fi -> laptop LAN address
-/// * iOS simulator / desktop -> `127.0.0.1`
+/// * Release builds -> production server (`parfumim.7sic4.online`)
+/// * Debug on Android device / emulator on the current Wi-Fi -> laptop LAN address
+/// * Debug on iOS simulator / desktop -> `127.0.0.1`
 ///
 /// Override at build time without editing code, or change it in the app's
 /// server settings to connect to a device on the local network:
@@ -22,6 +24,8 @@ class AppConfig {
   static const String _buildOverride = String.fromEnvironment('API_BASE_URL');
   static const String _savedUrlKey = 'parfumim.apiBaseUrl';
 
+  static const String _productionBaseUrl =
+      'https://parfumim.7sic4.online/api/v1';
   static const String _androidBaseUrl = 'http://192.168.100.119:8000/api/v1';
   static const String _localBaseUrl = 'http://127.0.0.1:8000/api/v1';
   static String? _runtimeOverride;
@@ -42,6 +46,7 @@ class AppConfig {
     if (_buildOverride.isNotEmpty) return _buildOverride;
     final override = _runtimeOverride;
     if (override != null && override.isNotEmpty) return override;
+    if (kReleaseMode) return _productionBaseUrl;
     return Platform.isAndroid ? _androidBaseUrl : _localBaseUrl;
   }
 
